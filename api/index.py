@@ -1,22 +1,23 @@
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import os
-import sys
 
-# Add the root directory to the path so we can import from main.py
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main import app as main_app
+app = FastAPI()
 
-app = main_app
+@app.get("/")
+async def root():
+    return JSONResponse({"message": "OpenAI API integration is running"})
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.post("/process")
+async def process_text(message: str = "Hello"):
+    try:
+        # Just echo back a simple response for testing
+        return JSONResponse({
+            "response": f"Received: {message}",
+            "api_key_exists": os.getenv("OPENAI_API_KEY") is not None
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
 
 # This is needed for Vercel serverless deployment
 handler = app 
