@@ -4,7 +4,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables - works locally
 load_dotenv()
 
 # Create FastAPI app
@@ -14,8 +14,9 @@ app = FastAPI()
 class InputText(BaseModel):
     message: str
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Initialize OpenAI client - use environment variable from Vercel in production
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 @app.get("/")
 async def root():
@@ -31,3 +32,8 @@ async def process_text(data: InputText):
         return {"response": response.choices[0].message.content}
     except Exception as e:
         return {"error": str(e)}
+
+# For local development
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
